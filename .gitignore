@@ -1,0 +1,27 @@
+# Model weights + remote code, re-downloadable from huggingface.co/redptam/tyrian-75m
+.modelcache/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python bytecode / tooling caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local env / secrets
+.env
+.env.*
+
+# Logs
+*.log
+
+# Editor / OS clutter
+.vscode/
+.idea/
+*.swp
+.DS_Store

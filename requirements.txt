@@ -1,0 +1,7 @@
+# CUDA 13.0 build (supports sm_120 / RTX 50xx):  --extra-index-url https://download.pytorch.org/whl/cu130
+torch==2.14.0+cu130
+transformers==5.17.0
+accelerate>=1.0
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
