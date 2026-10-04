@@ -86,7 +86,14 @@ def load(path: str):
     mdl.config.max_seq_len = NUM_CTX
     tok.model_max_length = NUM_CTX
 
-    stops = {v for v in (mdl.config.eos_token_id, getattr(mdl.config, "pad_token_id", None)) if isinstance(v, int)}
+    # SFT ends each assistant turn with <|im_end|>, which the config's eos_token_id (<eos>) doesn't cover
+    im_end = tok.convert_tokens_to_ids("<|im_end|>")
+    stops = {
+        v
+        for v in (mdl.config.eos_token_id, getattr(mdl.config, "pad_token_id", None), im_end)
+        if isinstance(v, int) and v != tok.unk_token_id
+    }
+    print(f"tyrian-serve: stop token ids {sorted(stops)}", flush=True)
     mdl.eval()
     mdl.requires_grad_(False)
     return tok, mdl, stops
