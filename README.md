@@ -13,7 +13,13 @@ Context length defaults to the length the model was trained on (`max_seq_len` in
    ./.venv/bin/pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu130
    ```
 
-2. Get the model weights. They are not in this repo (`.modelcache/` is git-ignored). The server loads them from `.modelcache/tyrian-500m/` by default. The 500M is not on Hugging Face yet, so export it from its checkpoint and link it in:
+2. Get the model weights. They are not in this repo (`.modelcache/` is git-ignored). The server loads them from `.modelcache/tyrian-500m/` by default. Download the 500M from <https://huggingface.co/redptam/tyrian-500m>:
+
+   ```bash
+   ./.venv/bin/hf download redptam/tyrian-500m --local-dir .modelcache/tyrian-500m
+   ```
+
+   Or, with the training checkpoints at hand, export one yourself and link it in:
 
    ```bash
    (cd ../tyrian-500m && python3 export_hf.py)          # writes ../tyrian-500m/hf_export/
@@ -25,8 +31,8 @@ Context length defaults to the length the model was trained on (`max_seq_len` in
    **tyrian-75m:** download it from <https://huggingface.co/redptam/tyrian-75m> and run with `MODEL_PATH` and `MODEL_NAME` pointing at it:
 
    ```bash
-   ./.venv/bin/hf download redptam/tyrian-75m --local-dir .modelcache
-   MODEL_PATH=.modelcache MODEL_NAME=tyrian-75m ./.venv/bin/python -m uvicorn server:app --host 0.0.0.0 --port 8000
+   ./.venv/bin/hf download redptam/tyrian-75m --local-dir .modelcache/tyrian-75m
+   MODEL_PATH=.modelcache/tyrian-75m MODEL_NAME=tyrian-75m ./.venv/bin/python -m uvicorn server:app --host 0.0.0.0 --port 8000
    ```
 
 ## Run
