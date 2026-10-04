@@ -1,4 +1,4 @@
-# Model weights + remote code, re-downloadable from huggingface.co/redptam/tyrian-75m
+# Model weights + remote code (tyrian-500m: export from ../tyrian-500m; tyrian-75m: huggingface.co/redptam/tyrian-75m)
 .modelcache/
 
 # Virtual environment

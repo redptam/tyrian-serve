@@ -17,9 +17,9 @@ from fastapi.responses import StreamingResponse
 from pydantic import AliasChoices, BaseModel, Field
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(_HERE, os.getenv("MODEL_PATH", ".modelcache"))
-NUM_CTX = int(os.getenv("NUM_CTX", "2048"))  # trained context length
-MODEL_ID = os.getenv("MODEL_NAME", "tyrian-75m")
+MODEL_PATH = os.path.join(_HERE, os.getenv("MODEL_PATH", ".modelcache/tyrian-500m"))
+NUM_CTX = int(os.getenv("NUM_CTX", "0"))  # 0 = the model's trained context length (config.max_seq_len)
+MODEL_ID = os.getenv("MODEL_NAME", "tyrian-500m")
 
 from transformers import AutoTokenizer, AutoModelForCausalLM  # noqa: E402
 
@@ -68,6 +68,7 @@ class ChatCompletionRequest(BaseModel):
 
 
 def load(path: str):
+    global NUM_CTX
     print(f"loading model from {path}", flush=True)
     tok = AutoTokenizer.from_pretrained(path, trust_remote_code=True)
     mdl = AutoModelForCausalLM.from_pretrained(
@@ -76,7 +77,14 @@ def load(path: str):
         dtype=MODEL_DTYPE,
     )
 
+    trained_ctx = mdl.config.max_seq_len
+    NUM_CTX = NUM_CTX or trained_ctx
+    extrapolated = " (beyond trained length: extrapolation, quality degrades)" if NUM_CTX > trained_ctx else ""
+    print(f"tyrian-serve: context window {NUM_CTX} tokens, trained on {trained_ctx}{extrapolated}", flush=True)
+
     mod = importlib.import_module(type(mdl).__module__)  # the custom module transformers loaded
+    # Always rebuild RoPE: sizes it to NUM_CTX, and exports made before the _init_weights fix
+    # (e.g. the published tyrian-75m) load these non-persistent buffers uninitialized
     cos, sin = mod.precompute_rope_freqs(
         mdl.config.hidden_size // mdl.config.num_heads, NUM_CTX, theta=mdl.config.rope_theta
     )
@@ -195,7 +203,7 @@ def prompt_ids(messages: List[dict]):
 
 
 class KVCache:
-    """Preallocated K/V buffers for every layer, one per request (~17 MB for a full 2048 ctx)."""
+    """Preallocated K/V buffers for every layer, one per request (~512 MB for the 500M at a full 8192 ctx)."""
 
     def __init__(self, max_len: int):
         cfg = MODEL.config
