@@ -20,6 +20,9 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(_HERE, os.getenv("MODEL_PATH", ".modelcache/tyrian-500m"))
 NUM_CTX = int(os.getenv("NUM_CTX", "0"))  # 0 = the model's trained context length (config.max_seq_len)
 MODEL_ID = os.getenv("MODEL_NAME", "tyrian-500m")
+# Used when a request doesn't set them. Past ~600 tokens the 500M mostly loops, so the default cap is short.
+DEFAULT_MAX_TOKENS = int(os.getenv("DEFAULT_MAX_TOKENS", "800"))
+DEFAULT_REPETITION_PENALTY = float(os.getenv("DEFAULT_REPETITION_PENALTY", "1.1"))
 
 from transformers import AutoTokenizer, AutoModelForCausalLM  # noqa: E402
 
@@ -55,14 +58,14 @@ class ChatCompletionRequest(BaseModel):
     temperature: float = 0.8
     top_p: Optional[float] = 1.0
     top_k: Optional[int] = 50
-    max_tokens: Optional[int] = 256
+    max_tokens: Optional[int] = None
     max_completion_tokens: Optional[int] = None  # newer OpenAI name; wins over max_tokens
     stop: Optional[Union[str, List[str]]] = None
     # Penalties apply to tokens generated so far (not the prompt, so the chat template isn't penalized).
     frequency_penalty: Optional[float] = None  # OpenAI: subtract penalty * count
     presence_penalty: Optional[float] = None  # OpenAI: subtract penalty once a token has appeared
     repetition_penalty: Optional[float] = Field(  # HF/llama.cpp style multiplicative, 1.0 = off
-        default=None, validation_alias=AliasChoices("repetition_penalty", "repeat_penalty")
+        default=DEFAULT_REPETITION_PENALTY, validation_alias=AliasChoices("repetition_penalty", "repeat_penalty")
     )
     stream: bool = False
 
@@ -308,7 +311,7 @@ def list_models():
 def chat_completions(request: ChatCompletionRequest):
     prompt = prompt_ids(request.messages)
 
-    max_tokens = int(request.max_completion_tokens or request.max_tokens or 256)
+    max_tokens = int(request.max_completion_tokens or request.max_tokens or DEFAULT_MAX_TOKENS)
     max_tokens = max(1, min(max_tokens, NUM_CTX - prompt.shape[1]))
     cid = "chatcmpl-" + uuid.uuid4().hex[:24]
     model_label = request.model or MODEL_ID
