@@ -50,7 +50,7 @@ Env vars:
 - `MODEL_NAME` — id exposed at `/v1/models` and echoed back (default `tyrian-500m`)
 - `MODEL_PATH` — weights directory, absolute or relative to this repo (default `.modelcache/tyrian-500m`)
 - `DEFAULT_MAX_TOKENS` — reply length cap when a request sets none (default `800`)
-- `DEFAULT_REPETITION_PENALTY` — `repetition_penalty` when a request sets none (default `1.1`; use `1.2`–`1.3` for the 75M, `1.0` turns it off)
+- `DEFAULT_REPETITION_PENALTY` — `repetition_penalty` when a request sets none (default `1.15`; use `1.2`–`1.3` for the 75M, `1.0` turns it off)
 - `PORT`, `HOST` — bind address for the built-in runner
 
 Endpoints:
@@ -60,7 +60,7 @@ Endpoints:
   - sampling: `temperature`, `top_p`, `top_k`
   - length: `max_completion_tokens` (preferred) or `max_tokens` (default `DEFAULT_MAX_TOKENS`, 800)
   - `stop`: string or list; output is cut before the first match (never partially streamed)
-  - penalties over generated tokens: `frequency_penalty`, `presence_penalty` (OpenAI semantics) and `repetition_penalty` / `repeat_penalty` (multiplicative, 1.0 = off; default `DEFAULT_REPETITION_PENALTY`, 1.1). Without one, the 500M looped to a 2048-token cap in 13 of 56 test replies; at 1.1, 2 of 56; at 1.15, none. The 75M loops badly without one; `repeat_penalty` ≈ 1.2–1.3 works well.
+  - penalties over generated tokens: `frequency_penalty`, `presence_penalty` (OpenAI semantics) and `repetition_penalty` / `repeat_penalty` (multiplicative, 1.0 = off; default `DEFAULT_REPETITION_PENALTY`, 1.15). Without one, the 500M looped to a 2048-token cap in 13 of 56 test replies; at 1.1, 2 of 56; at 1.15, none. The 75M loops badly without one; `repeat_penalty` ≈ 1.2–1.3 works well.
 - Generation stops at `<|im_end|>` (end of the assistant turn), `<eos>` or `<pad>`.
 
 Quick check:

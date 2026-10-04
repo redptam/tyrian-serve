@@ -22,7 +22,7 @@ NUM_CTX = int(os.getenv("NUM_CTX", "0"))  # 0 = the model's trained context leng
 MODEL_ID = os.getenv("MODEL_NAME", "tyrian-500m")
 # Used when a request doesn't set them. Past ~600 tokens the 500M mostly loops, so the default cap is short.
 DEFAULT_MAX_TOKENS = int(os.getenv("DEFAULT_MAX_TOKENS", "800"))
-DEFAULT_REPETITION_PENALTY = float(os.getenv("DEFAULT_REPETITION_PENALTY", "1.1"))
+DEFAULT_REPETITION_PENALTY = float(os.getenv("DEFAULT_REPETITION_PENALTY", "1.15"))
 
 from transformers import AutoTokenizer, AutoModelForCausalLM  # noqa: E402
 
